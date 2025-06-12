@@ -1,0 +1,2636 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banco Malvader - Sistema Completo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-dark: #1a1a1a;
+            --secondary-dark: #2a2a2a;
+            --accent-purple: #6a0dad;
+            --accent-red: #dc2626;
+            --text-light: #ffffff;
+            --text-gray: #b0b0b0;
+            --success-green: #10b981;
+            --warning-yellow: #f59e0b;
+            --info-blue: #3b82f6;
+            --danger-red: #ef4444;
+            --gradient-bg: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--gradient-bg);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideInLeft {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Base Classes */
+        .hidden {
+            display: none !important;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        .text-center { text-align: center; }
+        .mt-1 { margin-top: 0.5rem; }
+        .mt-2 { margin-top: 1rem; }
+        .mb-1 { margin-bottom: 0.5rem; }
+        .mb-2 { margin-bottom: 1rem; }
+
+        /* Logo */
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, var(--accent-purple), var(--accent-red));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        /* Login Screen */
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .login-form, .register-form {
+            background: var(--secondary-dark);
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 600px;
+            animation: fadeIn 0.6s ease-out;
+            border: 1px solid rgba(106, 13, 173, 0.3);
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-gray);
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #3a3a3a;
+            border-radius: 10px;
+            background: var(--primary-dark);
+            color: var(--text-light);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-group select {
+            cursor: pointer;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 0 3px rgba(106, 13, 173, 0.1);
+        }
+
+        .form-group input.error, .form-group select.error {
+            border-color: var(--accent-red);
+            animation: shake 0.3s ease-in-out;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        /* Account Type Selection */
+        .account-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .account-type-card {
+            background: var(--secondary-dark);
+            border: 2px solid #3a3a3a;
+            border-radius: 15px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .account-type-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-purple);
+        }
+
+        .account-type-card.selected {
+            border-color: var(--accent-purple);
+            background: rgba(106, 13, 173, 0.1);
+        }
+
+        .account-type-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .account-type-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .account-type-description {
+            color: var(--text-gray);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .account-type-features {
+            list-style: none;
+        }
+
+        .account-type-features li {
+            color: var(--text-gray);
+            font-size: 0.8rem;
+            margin-bottom: 0.3rem;
+            position: relative;
+            padding-left: 1rem;
+        }
+
+        .account-type-features li:before {
+            content: "✓";
+            color: var(--success-green);
+            position: absolute;
+            left: 0;
+        }
+
+        .conditional-fields {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            border-left: 3px solid var(--accent-purple);
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .conditional-fields h4 {
+            color: var(--accent-purple);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--accent-purple), var(--accent-red));
+            color: var(--text-light);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(106, 13, 173, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-gray);
+            border: 2px solid #3a3a3a;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent-purple);
+            color: var(--text-light);
+        }
+
+        .btn-success {
+            background: var(--success-green);
+            color: var(--text-light);
+        }
+
+        .btn-warning {
+            background: var(--warning-yellow);
+            color: var(--primary-dark);
+        }
+
+        .btn-danger {
+            background: var(--danger-red);
+            color: var(--text-light);
+        }
+
+        .btn-info {
+            background: var(--info-blue);
+            color: var(--text-light);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .link {
+            color: var(--accent-purple);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .link:hover {
+            color: var(--accent-red);
+        }
+
+        /* Dashboard Layout */
+        .dashboard {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: var(--secondary-dark);
+            padding: 2rem 0;
+            border-right: 1px solid rgba(106, 13, 173, 0.3);
+            animation: slideInLeft 0.6s ease-out;
+            position: relative;
+        }
+
+        .sidebar-header {
+            padding: 0 2rem 2rem;
+            border-bottom: 1px solid #3a3a3a;
+        }
+
+        .user-info {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-gray);
+        }
+
+        .sidebar-nav {
+            padding: 2rem 0;
+        }
+
+        .nav-section {
+            margin-bottom: 1rem;
+        }
+
+        .nav-section-title {
+            padding: 0.5rem 2rem;
+            color: var(--accent-purple);
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem 2rem;
+            color: var(--text-gray);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(106, 13, 173, 0.1);
+            color: var(--text-light);
+            border-left-color: var(--accent-purple);
+        }
+
+        .nav-item i {
+            margin-right: 1rem;
+            font-size: 1.2rem;
+            width: 20px;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            background: var(--gradient-bg);
+        }
+
+        .welcome-header {
+            margin-bottom: 2rem;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .welcome-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, var(--accent-purple), var(--accent-red));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .welcome-header p {
+            color: var(--text-gray);
+            font-size: 1.1rem;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--secondary-dark);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(106, 13, 173, 0.3);
+            animation: fadeIn 0.6s ease-out;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+        .card h3 {
+            color: var(--accent-purple);
+            margin-bottom: 1rem;
+        }
+
+        .balance-card {
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-red));
+            color: var(--text-light);
+            text-align: center;
+        }
+
+        .balance-amount {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+
+        .balance-label {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .account-info {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .account-info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--secondary-dark);
+            padding: 1.5rem;
+            border-radius: 15px;
+            border: 1px solid rgba(106, 13, 173, 0.3);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent-purple);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-gray);
+            font-size: 0.9rem;
+        }
+
+        /* Tables */
+        .table-container {
+            background: var(--secondary-dark);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(106, 13, 173, 0.3);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #3a3a3a;
+        }
+
+        .table th {
+            background: var(--primary-dark);
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        .table td {
+            color: var(--text-gray);
+        }
+
+        .table tr:hover {
+            background: rgba(106, 13, 173, 0.1);
+        }
+
+        .table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            min-width: 150px;
+        }
+
+        .filter-group label {
+            margin-bottom: 0.5rem;
+            color: var(--text-gray);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 0.7rem;
+            border: 2px solid #3a3a3a;
+            border-radius: 8px;
+            background: var(--primary-dark);
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success-green);
+            border: 1px solid var(--success-green);
+        }
+
+        .badge-danger {
+            background: rgba(220, 38, 38, 0.2);
+            color: var(--danger-red);
+            border: 1px solid var(--danger-red);
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning-yellow);
+            border: 1px solid var(--warning-yellow);
+        }
+
+        .badge-info {
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--info-blue);
+            border: 1px solid var(--info-blue);
+        }
+
+        .badge-purple {
+            background: rgba(106, 13, 173, 0.2);
+            color: var(--accent-purple);
+            border: 1px solid var(--accent-purple);
+        }
+
+        /* Transaction Icons */
+        .transaction-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+            font-size: 0.8rem;
+            color: white;
+        }
+
+        .transaction-income {
+            background: var(--success-green);
+        }
+
+        .transaction-expense {
+            background: var(--danger-red);
+        }
+
+        .transaction-transfer {
+            background: var(--info-blue);
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-content {
+            background: var(--secondary-dark);
+            padding: 2rem;
+            border-radius: 15px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid rgba(106, 13, 173, 0.3);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #3a3a3a;
+        }
+
+        .modal-title {
+            color: var(--accent-purple);
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-gray);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: var(--text-light);
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            animation: slideDown 0.3s ease-out;
+            border-left: 4px solid;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: var(--success-green);
+            color: var(--success-green);
+        }
+
+        .alert-error {
+            background: rgba(220, 38, 38, 0.1);
+            border-color: var(--danger-red);
+            color: var(--danger-red);
+        }
+
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: var(--warning-yellow);
+            color: var(--warning-yellow);
+        }
+
+        .alert-info {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: var(--info-blue);
+            color: var(--info-blue);
+        }
+
+        /* Charts */
+        .chart-container {
+            margin-top: 2rem;
+            height: 200px;
+            position: relative;
+        }
+
+        .chart {
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            display: flex;
+            align-items: end;
+            justify-content: space-around;
+            padding: 1rem;
+        }
+
+        .chart-bar {
+            width: 30px;
+            background: linear-gradient(to top, var(--accent-red), var(--accent-purple));
+            border-radius: 3px;
+            animation: pulse 2s infinite;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #3a3a3a;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, var(--accent-purple), var(--accent-red));
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        /* Limit Display */
+        .limit-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .limit-amount {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .limit-available {
+            color: var(--success-green);
+        }
+
+        .limit-used {
+            color: var(--danger-red);
+        }
+
+        /* Investment Portfolio */
+        .investment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .investment-card {
+            background: var(--primary-dark);
+            padding: 1rem;
+            border-radius: 10px;
+            border: 1px solid #3a3a3a;
+            text-align: center;
+        }
+
+        .investment-return {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+
+        .investment-return.positive {
+            color: var(--success-green);
+        }
+
+        .investment-return.negative {
+            color: var(--danger-red);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .form-row {
+                flex-direction: column;
+            }
+            
+            .filters {
+                flex-direction: column;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                position: fixed;
+                top: 0;
+                left: -100%;
+                height: 100vh;
+                z-index: 999;
+                transition: left 0.3s ease;
+            }
+            
+            .sidebar.open {
+                left: 0;
+            }
+            
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .welcome-header h1 {
+                font-size: 2rem;
+            }
+            
+            .balance-amount {
+                font-size: 2rem;
+            }
+            
+            .account-types {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                width: 95%;
+                padding: 1rem;
+            }
+        }
+
+        /* Mobile Menu Button */
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1001;
+            background: var(--accent-purple);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            .sidebar, .modal, .mobile-menu-btn {
+                display: none !important;
+            }
+            
+            .main-content {
+                padding: 0;
+            }
+            
+            .card {
+                break-inside: avoid;
+                border: 1px solid #ccc;
+            }
+        }
+    </style>
+</head>
+
+
+
+<body>
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-form">
+            <div class="logo">Banco Malvader</div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">E-mail</label>
+                    <input type="email" id="loginEmail" required placeholder="seu@email.com">
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Senha</label>
+                    <input type="password" id="loginPassword" required placeholder="Digite sua senha">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                    <span class="login-text">Entrar</span>
+                    <span class="loading hidden"></span>
+                </button>
+                <div class="text-center mt-2">
+                    <a href="#" class="link" onclick="showForgotPassword()">Esqueceu a senha?</a>
+                </div>
+                <div class="text-center mt-2">
+                    <button type="button" class="btn btn-secondary btn-block" onclick="showRegister()">Criar conta</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Register Screen -->
+    <div id="registerScreen" class="login-container hidden">
+        <div class="register-form">
+            <div class="logo">Banco Malvader</div>
+            <h2 class="text-center mb-2">Criar conta</h2>
+            <form id="registerForm">
+                <!-- Dados Pessoais -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="registerName">Nome Completo</label>
+                        <input type="text" id="registerName" required placeholder="Seu nome completo">
+                    </div>
+                    <div class="form-group">
+                        <label for="registerCPF">CPF</label>
+                        <input type="text" id="registerCPF" required maxlength="14" placeholder="000.000.000-00">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="registerEmail">E-mail</label>
+                        <input type="email" id="registerEmail" required placeholder="seu@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="registerPhone">Telefone</label>
+                        <input type="text" id="registerPhone" required maxlength="15" placeholder="(00) 00000-0000">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="registerPassword">Senha</label>
+                        <input type="password" id="registerPassword" required minlength="8" placeholder="Mínimo 8 caracteres">
+                    </div>
+                    <div class="form-group">
+                        <label for="registerConfirmPassword">Confirmar Senha</label>
+                        <input type="password" id="registerConfirmPassword" required placeholder="Confirme sua senha">
+                    </div>
+                </div>
+
+                <!-- Seleção do Tipo de Conta -->
+                <div class="form-group">
+                    <label>Escolha o tipo de conta:</label>
+                    <div class="account-types">
+                        <div class="account-type-card" data-type="poupanca" onclick="selectAccountType('poupanca')">
+                            <span class="account-type-icon">🏦</span>
+                            <div class="account-type-title">Conta Poupança</div>
+                            <div class="account-type-description">Ideal para guardar dinheiro com rendimento</div>
+                            <ul class="account-type-features">
+                                <li>Rendimento de 0,5% ao mês</li>
+                                <li>Sem taxa de manutenção</li>
+                                <li>Saque a qualquer momento</li>
+                                <li>Meta de poupança personalizada</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="account-type-card" data-type="corrente" onclick="selectAccountType('corrente')">
+                            <span class="account-type-icon">💳</span>
+                            <div class="account-type-title">Conta Corrente</div>
+                            <div class="account-type-description">Para movimentação diária com limite especial</div>
+                            <ul class="account-type-features">
+                                <li>Limite de cheque especial</li>
+                                <li>Cartão de débito/crédito</li>
+                                <li>Taxa de manutenção R$ 15/mês</li>
+                                <li>Análise de crédito personalizada</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="account-type-card" data-type="investimento" onclick="selectAccountType('investimento')">
+                            <span class="account-type-icon">📈</span>
+                            <div class="account-type-title">Conta Investimento</div>
+                            <div class="account-type-description">Para quem quer investir e fazer o dinheiro crescer</div>
+                            <ul class="account-type-features">
+                                <li>Acesso a investimentos</li>
+                                <li>Consultor personalizado</li>
+                                <li>Valor mínimo R$ 1.000</li>
+                                <li>Relatórios de performance</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Campos Específicos por Tipo de Conta -->
+                <div id="poupancaFields" class="conditional-fields hidden">
+                    <h4>📊 Configurações da Poupança</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="poupancaGoal">Meta de poupança (opcional)</label>
+                            <input type="number" id="poupancaGoal" step="0.01" min="0" placeholder="Ex: 10000.00">
+                        </div>
+                        <div class="form-group">
+                            <label for="poupancaAutoSave">Poupança automática mensal (opcional)</label>
+                            <input type="number" id="poupancaAutoSave" step="0.01" min="0" placeholder="Ex: 500.00">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="correnteFields" class="conditional-fields hidden">
+                    <h4>💳 Configurações da Conta Corrente</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="correnteLimitSolicited">Limite de cheque especial solicitado</label>
+                            <select id="correnteLimitSolicited" required>
+                                <option value="">Selecione o limite</option>
+                                <option value="500">R$ 500,00</option>
+                                <option value="1000">R$ 1.000,00</option>
+                                <option value="2000">R$ 2.000,00</option>
+                                <option value="5000">R$ 5.000,00</option>
+                                <option value="10000">R$ 10.000,00</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="correnteIncome">Renda mensal comprovada</label>
+                            <input type="number" id="correnteIncome" step="0.01" min="0" required placeholder="Ex: 3000.00">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="correnteEmployment">Situação profissional</label>
+                        <select id="correnteEmployment" required>
+                            <option value="">Selecione</option>
+                            <option value="clt">CLT</option>
+                            <option value="autonomo">Autônomo</option>
+                            <option value="empresario">Empresário</option>
+                            <option value="aposentado">Aposentado</option>
+                            <option value="estudante">Estudante</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="investimentoFields" class="conditional-fields hidden">
+                    <h4>📈 Configurações da Conta Investimento</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="investimentoProfile">Perfil de investidor</label>
+                            <select id="investimentoProfile" required>
+                                <option value="">Selecione seu perfil</option>
+                                <option value="conservador">Conservador - Baixo risco</option>
+                                <option value="moderado">Moderado - Risco equilibrado</option>
+                                <option value="arrojado">Arrojado - Alto risco/retorno</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="investimentoInitialAmount">Valor inicial para investimento</label>
+                            <input type="number" id="investimentoInitialAmount" step="0.01" min="1000" required placeholder="Mínimo: R$ 1.000,00">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="investimentoExperience">Experiência com investimentos</label>
+                            <select id="investimentoExperience" required>
+                                <option value="">Selecione</option>
+                                <option value="nenhuma">Nenhuma experiência</option>
+                                <option value="basica">Básica (até 2 anos)</option>
+                                <option value="intermediaria">Intermediária (2-5 anos)</option>
+                                <option value="avancada">Avançada (mais de 5 anos)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="investimentoObjective">Objetivo principal</label>
+                            <select id="investimentoObjective" required>
+                                <option value="">Selecione</option>
+                                <option value="reserva">Reserva de emergência</option>
+                                <option value="aposentadoria">Aposentadoria</option>
+                                <option value="compra">Compra de imóvel/carro</option>
+                                <option value="educacao">Educação</option>
+                                <option value="crescimento">Crescimento do patrimônio</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <input type="hidden" id="selectedAccountType" required>
+                <button type="submit" class="btn btn-primary btn-block">Criar conta</button>
+                <div class="text-center mt-2">
+                    <button type="button" class="btn btn-secondary btn-block" onclick="showLogin()">Voltar ao login</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Forgot Password Screen -->
+    <div id="forgotPasswordScreen" class="login-container hidden">
+        <div class="login-form">
+            <div class="logo">Banco Malvader</div>
+            <h2 class="text-center mb-2">Recuperar Senha</h2>
+            <form id="forgotPasswordForm">
+                <div class="form-group">
+                    <label for="forgotEmail">E-mail</label>
+                    <input type="email" id="forgotEmail" required placeholder="seu@email.com">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                    <span>Enviar link de recuperação</span>
+                    <span class="loading hidden"></span>
+                </button>
+                <div class="text-center mt-2">
+                    <button type="button" class="btn btn-secondary btn-block" onclick="showLogin()">Voltar ao login</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboardScreen" class="dashboard hidden">
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo" style="font-size: 1.5rem;">Banco Malvader</div>
+                <div class="user-info">
+                    <div><strong id="userName">Usuário</strong></div>
+                    <div id="userRole">Cliente</div>
+                    <div id="userAccount">Conta: 0000-0</div>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <!-- Menu Principal -->
+                <div class="nav-section">
+                    <div class="nav-item active" onclick="showDashboard()" data-section="dashboard">
+                        <i>📊</i>
+                        <span>Visão Geral</span>
+                    </div>
+                </div>
+
+                <!-- Menu Cliente -->
+                <div id="clientMenu">
+                    <div class="nav-section">
+                        <div class="nav-section-title">Conta</div>
+                        <div class="nav-item" onclick="showExtract()" data-section="extract">
+                            <i>📋</i>
+                            <span>Extrato</span>
+                        </div>
+                        <div class="nav-item" onclick="showTransfer()" data-section="transfer">
+                            <i>💸</i>
+                            <span>Transferência</span>
+                        </div>
+                        <div class="nav-item" onclick="showLimits()" data-section="limits">
+                            <i>💳</i>
+                            <span>Limites</span>
+                        </div>
+                        <div class="nav-item" onclick="showInvestments()" data-section="investments">
+                            <i>📈</i>
+                            <span>Investimentos</span>
+                        </div>
+                    </div>
+                    <div class="nav-section">
+                        <div class="nav-section-title">Perfil</div>
+                        <div class="nav-item" onclick="showProfile()" data-section="profile">
+                            <i>👤</i>
+                            <span>Meu Perfil</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Menu Funcionário -->
+                <div id="employeeMenu" class="hidden">
+                    <div class="nav-section">
+                        <div class="nav-section-title">Atendimento</div>
+                        <div class="nav-item" onclick="showAccountOpening()" data-section="account-opening">
+                            <i>🏦</i>
+                            <span>Abertura de Conta</span>
+                        </div>
+                        <div class="nav-item" onclick="showAccountClosure()" data-section="account-closure">
+                            <i>🔒</i>
+                            <span>Encerramento</span>
+                        </div>
+                        <div class="nav-item" onclick="showCustomerSearch()" data-section="customer-search">
+                            <i>🔍</i>
+                            <span>Buscar Cliente</span>
+                        </div>
+                    </div>
+                    <div class="nav-section">
+                        <div class="nav-section-title">Gestão</div>
+                        <div class="nav-item" onclick="showEmployeeManagement()" data-section="employee-management">
+                            <i>👥</i>
+                            <span>Funcionários</span>
+                        </div>
+                        <div class="nav-item" onclick="showReports()" data-section="reports">
+                            <i>📊</i>
+                            <span>Relatórios</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Menu Admin -->
+                <div id="adminMenu" class="nav-section hidden">
+                    <div class="nav-section-title">Administração</div>
+                    <div class="nav-item" onclick="showAdmin()" data-section="admin">
+                        <i>⚙️</i>
+                        <span>Painel Admin</span>
+                    </div>
+                </div>
+                
+                <!-- Logout -->
+                <div class="nav-section" style="margin-top: auto;">
+                    <div class="nav-item" onclick="logout()">
+                        <i>🚪</i>
+                        <span>Sair</span>
+                    </div>
+                </div>
+            </nav>
+        </div>
+
+        <main class="main-content">
+          <!-- Account Opening (Abertura de Conta) Funcionário -->
+<div id="accountOpeningContent" class="hidden">
+    <div class="welcome-header">
+        <h1>Abertura de Conta</h1>
+        <p>Cadastrar novo cliente com tipo de conta e campos específicos</p>
+    </div>
+    <div class="card">
+        <form id="employeeAccountOpeningForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="empClientName">Nome</label>
+                    <input type="text" id="empClientName" required>
+                </div>
+                <div class="form-group">
+                    <label for="empClientCPF">CPF</label>
+                    <input type="text" id="empClientCPF" required maxlength="14">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="empClientEmail">E-mail</label>
+                    <input type="email" id="empClientEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="empClientPhone">Telefone</label>
+                    <input type="text" id="empClientPhone" required maxlength="15">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="empClientAccountType">Tipo de Conta</label>
+                    <select id="empClientAccountType" required onchange="showEmpAccountTypeFields()">
+                        <option value="">Selecione</option>
+                        <option value="poupanca">Poupança</option>
+                        <option value="corrente">Corrente</option>
+                        <option value="investimento">Investimento</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="empInitialDeposit">Depósito Inicial</label>
+                    <input type="number" id="empInitialDeposit" min="0" step="0.01" required>
+                </div>
+            </div>
+            <!-- Campos específicos de cada tipo de conta -->
+            <div id="empAccountTypeSpecificFields"></div>
+            <button class="btn btn-primary btn-block mt-2" type="submit">Abrir Conta</button>
+        </form>
+    </div>
+</div>
+
+<!-- Account Closure (Encerramento de Conta) Funcionário -->
+<div id="accountClosureContent" class="hidden">
+    <div class="welcome-header">
+        <h1>Encerramento de Conta</h1>
+        <p>Excluir/encerrar conta de cliente (requer senha admin)</p>
+    </div>
+    <div class="card">
+        <form id="accountClosureForm">
+            <div class="form-group">
+                <label for="closureCPF">CPF ou Conta</label>
+                <input type="text" id="closureCPF" placeholder="CPF ou Nº da conta" required>
+            </div>
+            <div class="form-group">
+                <label for="closureReason">Motivo</label>
+                <select id="closureReason" required>
+                    <option value="">Selecione</option>
+                    <option value="cliente">Solicitação cliente</option>
+                    <option value="inadimplencia">Inadimplência</option>
+                    <option value="irregularidade">Irregularidade</option>
+                    <option value="outros">Outros</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="closureAdminPassword">Senha Administrativa</label>
+                <input type="password" id="closureAdminPassword" required>
+            </div>
+            <button class="btn btn-danger btn-block mt-2" type="submit">Encerrar Conta</button>
+        </form>
+    </div>
+</div>
+
+<!-- Employee Management (Cadastro e Listagem de Funcionários) -->
+<div id="employeeManagementContent" class="hidden">
+    <div class="welcome-header">
+        <h1>Gestão de Funcionários</h1>
+        <p>Cadastrar e visualizar funcionários</p>
+    </div>
+    <div class="card">
+        <form id="employeeRegisterForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="newEmpName">Nome</label>
+                    <input type="text" id="newEmpName" required>
+                </div>
+                <div class="form-group">
+                    <label for="newEmpCPF">CPF</label>
+                    <input type="text" id="newEmpCPF" required maxlength="14">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="newEmpRole">Cargo</label>
+                    <select id="newEmpRole" required>
+                        <option value="">Selecione</option>
+                        <option value="atendente">Atendente</option>
+                        <option value="supervisor">Supervisor</option>
+                        <option value="gerente">Gerente</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="newEmpSupervisor">Supervisor</label>
+                    <input type="text" id="newEmpSupervisor">
+                </div>
+                <div class="form-group">
+                    <label for="newEmpSalary">Salário</label>
+                    <input type="number" id="newEmpSalary" min="0" step="0.01" required>
+                </div>
+            </div>
+            <button class="btn btn-primary btn-block mt-2" type="submit">Cadastrar Funcionário</button>
+        </form>
+    </div>
+    <div class="card">
+        <h3>Funcionários cadastrados</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>CPF</th>
+                    <th>Cargo</th>
+                    <th>Supervisor</th>
+                    <th>Salário</th>
+                </tr>
+            </thead>
+            <tbody id="employeesTableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Reports (Relatórios) -->
+<div id="reportsContent" class="hidden">
+    <div class="welcome-header">
+        <h1>Relatórios</h1>
+        <p>Gere relatórios detalhados (movimentações, inadimplência, desempenho)</p>
+    </div>
+    <div class="card">
+        <form id="reportForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="reportType">Tipo de Relatório</label>
+                    <select id="reportType" required>
+                        <option value="movimentacoes">Movimentações</option>
+                        <option value="inadimplencia">Inadimplência</option>
+                        <option value="desempenho">Desempenho</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="reportStart">Data Inicial</label>
+                    <input type="date" id="reportStart" required>
+                </div>
+                <div class="form-group">
+                    <label for="reportEnd">Data Final</label>
+                    <input type="date" id="reportEnd" required>
+                </div>
+                <div class="form-group">
+                    <label for="reportExport">Exportar</label>
+                    <select id="reportExport" required>
+                        <option value="pdf">PDF</option>
+                        <option value="excel">Excel</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn btn-primary btn-block mt-2" type="submit">Gerar Relatório</button>
+        </form>
+    </div>
+    <div class="card hidden" id="reportResultsCard">
+        <h3>Resultados</h3>
+        <div id="reportResults"></div>
+        <button class="btn btn-success btn-small mt-2" onclick="exportReport()">Exportar</button>
+    </div>
+</div>
+          
+            <!-- Dashboard Overview -->
+            <div id="dashboardContent">
+                <div class="welcome-header">
+                    <h1>Bem-vindo, <span id="welcomeName">Usuário</span>!</h1>
+                    <p id="welcomeSubtitle">Gerencie suas finanças com segurança e praticidade</p>
+                </div>
+
+                <!-- Account Balance Card -->
+                <div class="card balance-card" id="balanceCard">
+                    <div class="balance-label">Saldo atual</div>
+                    <div class="balance-amount" id="currentBalance">R$ 0,00</div>
+                    <div class="account-info" id="accountSpecificInfo">
+                        <!-- Dynamic account info -->
+                    </div>
+                    <div class="chart-container" id="chartContainer">
+                        <div class="chart">
+                            <div class="chart-bar" style="height: 60%;"></div>
+                            <div class="chart-bar" style="height: 80%;"></div>
+                            <div class="chart-bar" style="height: 45%;"></div>
+                            <div class="chart-bar" style="height: 90%;"></div>
+                            <div class="chart-bar" style="height: 75%;"></div>
+                            <div class="chart-bar" style="height: 85%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="stats-grid" id="dashboardStats">
+                    <!-- Dynamic stats -->
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card" id="quickActions">
+                    <h3>Ações Rápidas</h3>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <button class="btn btn-primary btn-small" onclick="showTransfer()">
+                            💸 Transferir
+                        </button>
+                        <button class="btn btn-secondary btn-small" onclick="showExtract()">
+                            📋 Ver Extrato
+                        </button>
+                        <button class="btn btn-info btn-small" onclick="showLimits()">
+                            💳 Consultar Limites
+                        </button>
+                        <button class="btn btn-success btn-small" onclick="showInvestments()">
+                            📈 Investimentos
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Extract Screen -->
+            <div id="extractContent" class="hidden">
+                <div class="welcome-header">
+                    <h1>Extrato Bancário</h1>
+                    <p>Histórico completo de suas transações com filtros avançados</p>
+                </div>
+
+                <div class="card">
+                    <h3>Filtros</h3>
+                    <div class="filters">
+                        <div class="filter-group">
+                            <label>Data inicial</label>
+                            <input type="date" id="filterStartDate">
+                        </div>
+                        <div class="filter-group">
+                            <label>Data final</label>
+                            <input type="date" id="filterEndDate">
+                        </div>
+                        <div class="filter-group">
+                            <label>Tipo</label>
+                            <select id="filterType">
+                                <option value="">Todos</option>
+                                <option value="income">Entrada</option>
+                                <option value="expense">Saída</option>
+                                <option value="transfer">Transferência</option>
+                                <option value="yield">Rendimento</option>
+                                <option value="fee">Taxa</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Valor mínimo</label>
+                            <input type="number" id="filterMinAmount" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="filter-group">
+                            <label>Valor máximo</label>
+                            <input type="number" id="filterMaxAmount" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="filter-group">
+                            <label>&nbsp;</label>
+                            <button class="btn btn-primary" onclick="applyExtractFilters()">Filtrar</button>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Tipo</th>
+                                    <th>Descrição</th>
+                                    <th>Valor</th>
+                                    <th>Saldo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactionsList">
+                                <!-- Transactions will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="margin-top: 1rem; text-align: right;">
+                        <button class="btn btn-success btn-small" onclick="exportExtract()">
+                            📄 Exportar PDF
+                        </button>
+                        <button class="btn btn-info btn-small" onclick="exportExtractExcel()">
+                            📊 Exportar Excel
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transfer Screen -->
+            <div id="transferContent" class="hidden">
+                <div class="welcome-header">
+                    <h1>Transferência</h1>
+                    <p>Envie dinheiro com segurança e praticidade</p>
+                </div>
+
+                <div class="card">
+                    <h3>Nova Transferência</h3>
+                    <form id="transferForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="recipientName">Nome do destinatário</label>
+                                <input type="text" id="recipientName" required placeholder="Nome completo">
+                            </div>
+                            <div class="form-group">
+                                <label for="recipientCPF">CPF do destinatário</label>
+                                <input type="text" id="recipientCPF" required maxlength="14" placeholder="000.000.000-00">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="recipientAccount">Conta do destinatário</label>
+                                <input type="text" id="recipientAccount" required placeholder="0000-0">
+                            </div>
+                            <div class="form-group">
+                                <label for="transferAmount">Valor</label>
+                                <input type="number" id="transferAmount" step="0.01" min="0.01" required placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="transferDescription">Descrição</label>
+                            <input type="text" id="transferDescription" required placeholder="Motivo da transferência">
+                        </div>
+                        
+                        <div id="transferLimitInfo" class="alert alert-info">
+                            <strong>Limite diário:</strong> R$ 10.000,00 | <strong>Utilizado hoje:</strong> <span id="dailyUsed">R$ 0,00</span>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block">
+                            💸 Transferir
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Limits Screen -->
+            <div id="limitsContent" class="hidden">
+                <div class="welcome-header">
+                    <h1>Consulta de Limites</h1>
+                    <p>Acompanhe seus limites e disponibilidades</p>
+                </div>
+
+                <!-- Transfer Limits -->
+                <div class="card">
+                    <h3>Limites de Transferência</h3>
+                    <div class="limit-display">
+                        <span>Limite diário:</span>
+                        <span class="limit-amount">R$ 10.000,00</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="dailyLimitProgress" style="width: 0%;"></div>
+                    </div>
+                    <div class="limit-display">
+                        <span>Utilizado hoje:</span>
+                        <span class="limit-amount limit-used" id="dailyLimitUsed">R$ 0,00</span>
+                    </div>
+                    <div class="limit-display">
+                        <span>Disponível:</span>
+                        <span class="limit-amount limit-available" id="dailyLimitAvailable">R$ 10.000,00</span>
+                    </div>
+                </div>
+
+                <!-- Credit Limits (for current account) -->
+                <div class="card" id="creditLimitsCard">
+                    <h3>Limite de Cheque Especial</h3>
+                    <div class="limit-display">
+                        <span>Limite total:</span>
+                        <span class="limit-amount" id="creditLimitTotal">R$ 0,00</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="creditLimitProgress" style="width: 0%;"></div>
+                    </div>
+                    <div class="limit-display">
+                        <span>Utilizado:</span>
+                        <span class="limit-amount limit-used" id="creditLimitUsed">R$ 0,00</span>
+                    </div>
+                    <div class="limit-display">
+                        <span>Disponível:</span>
+                        <span class="limit-amount limit-available" id="creditLimitAvailable">R$ 0,00</span>
+                    </div>
+                </div>
+
+                <!-- Investment Limits (for investment account) -->
+                <div class="card" id="investmentLimitsCard">
+                    <h3>Limites de Investimento</h3>
+                    <div class="limit-display">
+                        <span>Valor mínimo por operação:</span>
+                        <span class="limit-amount">R$ 100,00</span>
+                    </div>
+                    <div class="limit-display">
+                        <span>Valor máximo diário:</span>
+                        <span class="limit-amount">R$ 50.000,00</span>
+                    </div>
+                    <div class="limit-display">
+                        <span>Perfil de risco:</span>
+                        <span class="badge badge-info" id="riskProfile">Moderado</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Investments Screen -->
+            <div id="investmentsContent" class="hidden">
+                <div class="welcome-header">
+                    <h1>Investimentos</h1>
+                    <p>Faça seu dinheiro trabalhar para você</p>
+                </div>
+
+                <!-- Investment Portfolio -->
+                <div class="card" id="investmentPortfolioCard">
+                    <h3>Meu Portfólio</h3>
+                    <div class="investment-grid" id="investmentGrid">
+                        <!-- Dynamic investment cards -->
+                    </div>
+                </div>
+
+                <!-- Yield Projection -->
+                <div class="card" id="yieldProjectionCard">
+                    <h3>Projeção de Rendimentos</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="projectionAmount">Valor a investir</label>
+                            <input type="number" id="projectionAmount" step="0.01" min="0" placeholder="1000.00">
+                        </div>
+                        <div class="form-group">
+                            <label for="projectionPeriod">Período (meses)</label>
+                            <select id="projectionPeriod">
+                                <option value="1">1 mês</option>
+                                <option value="3">3 meses</option>
+                                <option value="6">6 meses</option>
+                                <option value="12">1 ano</option>
+                                <option value="24">2 anos</option>
+                                <option value="36">3 anos</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <button class="btn btn-primary" onclick="calculateYieldProjection()">Calcular</button>
+                        </div>
+                    </div>
+                    
+                    <div id="projectionResults" class="hidden">
+                        <h4>Resultados da Projeção</h4>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number" id="projectedTotal">R$ 0,00</div>
+                                <div class="stat-label">Valor Final</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="projectedYield">R$ 0,00</div>
+                                <div class="stat-label">Rendimento</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="projectedRate">0%</div>
+                                <div class="stat-label">Rentabilidade</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Available Investments -->
+                <div class="card">
+                    <h3>Investimentos Disponíveis</h3>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Produto</th>
+                                    <th>Rentabilidade</th>
+                                    <th>Risco</th>
+                                    <th>Valor Mínimo</th>
+                                    <th>Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Poupança</td>
+                                    <td class="investment-return positive">0,5% a.m.</td>
+                                    <td><span class="badge badge-success">Baixo</span></td>
+                                    <td>R$ 50,00</td>
+                                    <td><button class="btn btn-primary btn-small">Investir</button></td>
+                                </tr>
+                                <tr>
+                                    <td>CDB 100% CDI</td>
+                                    <td class="investment-return positive">1,2% a.m.</td>
+                                    <td><span class="badge badge-info">Baixo</span></td>
+                                    <td>R$ 1.000,00</td>
+                                    <td><button class="btn btn-primary btn-small">Investir</button></td>
+                                </tr>
+                                <tr>
+                                    <td>Fundo Multimercado</td>
+                                    <td class="investment-return positive">2,1% a.m.</td>
+                                    <td><span class="badge badge-warning">Médio</span></td>
+                                    <td>R$ 5.000,00</td>
+                                    <td><button class="btn btn-primary btn-small">Investir</button></td>
+                                </tr>
+                                <tr>
+                                    <td>Ações</td>
+                                    <td class="investment-return">Variável</td>
+                                    <td><span class="badge badge-danger">Alto</span></td>
+                                    <td>R$ 100,00</td>
+                                    <td><button class="btn btn-primary btn-small">Investir</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Screen -->
+            <div id="profileContent" class="hidden">
+                <div class="welcome-header">
+                    <h1>Meu Perfil</h1>
+                    <p>Gerencie suas informações pessoais e preferências</p>
+                </div>
+
+                <div class="card">
+                    <h3>Informações Pessoais</h3>
+                    <form id="profileForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="profileName">Nome Completo</label>
+                                <input type="text" id="profileName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="profileCPF">CPF</label>
+                                <input type="text" id="profileCPF" readonly>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="profileEmail">E-mail</label>
+                                <input type="email" id="profileEmail" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="profilePhone">Telefone</label>
+                                <input type="text" id="profilePhone" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="profileNewPassword">Nova senha (deixe em branco para manter atual)</label>
+                            <input type="password" id="profileNewPassword" minlength="8">
+                        </div>
+                        <div style="display: flex; gap: 1rem;">
+                            <button type="submit" class="btn btn-primary" style="flex: 1;">
+                                💾 Salvar Alterações
+                            </button>
+                            <button type="button" class="btn btn-danger" style="flex: 1;" onclick="confirmDeleteAccount()">
+                                🗑️ Excluir Conta
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Account Information -->
+                <div class="card">
+                    <h3>Informações da Conta</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Número da Conta</label>
+                         <input type="text" id="profileAccountNumber" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="profileAccountType">Tipo de Conta</label>
+                        <input type="text" id="profileAccountType" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="profileCreatedAt">Data de abertura</label>
+                        <input type="text" id="profileCreatedAt" readonly>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmação de Exclusão de Conta -->
+    <div id="confirmModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">Confirmação</span>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <p id="modalMessage">Tem certeza que deseja excluir sua conta? Essa ação não poderá ser desfeita.</p>
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+                <button class="btn btn-danger" id="modalConfirmBtn">Excluir</button>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- SCRIPTS PRINCIPAIS -->
+    <script>
+// Dados de usuários para simulação
+let users = [
+    {
+        id: 1,
+        name: 'Pablio Sousa',
+        email: 'pablio@email.com',
+        password: '123456',
+        cpf: '123.456.789-00',
+        balance: 2500.00,
+        isAdmin: false,
+        isEmployee: false,
+        isBlocked: false,
+        accountType: 'corrente',
+        accountNumber: '1001-1',
+        createdAt: '2025-01-01'
+    },
+    {
+        id: 2,
+        name: 'Administrador',
+        email: 'admin@email.com',
+        password: 'admin123',
+        cpf: '000.000.000-00',
+        balance: 50000.00,
+        isAdmin: true,
+        isEmployee: true,
+        isBlocked: false,
+        accountType: 'corrente',
+        accountNumber: '0001-0',
+        createdAt: '2025-01-01'
+    }
+];
+
+let currentUser = null;
+let employees = []; // Array separado para funcionários
+
+// Função para mostrar alertas
+function showAlert(message, type = 'info') {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type}`;
+    alertDiv.textContent = message;
+    
+    // Inserir no topo da tela atual
+    const currentScreen = document.querySelector('.login-container:not(.hidden)') || 
+                         document.querySelector('.main-content');
+    
+    if (currentScreen) {
+        if (currentScreen.classList.contains('main-content')) {
+            currentScreen.insertBefore(alertDiv, currentScreen.firstChild);
+        } else {
+            const form = currentScreen.querySelector('form');
+            form.parentNode.insertBefore(alertDiv, form);
+        }
+        
+        // Auto-remover após 5 segundos
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 5000);
+    }
+}
+
+// ----------- NAVEGAÇÃO ENTRE TELAS DE LOGIN/REGISTRO -----------
+
+// Mostrar tela de login
+function showLogin() {
+    document.getElementById('loginScreen').classList.remove('hidden');
+    document.getElementById('registerScreen').classList.add('hidden');
+    document.getElementById('forgotPasswordScreen').classList.add('hidden');
+    document.getElementById('dashboardScreen').classList.add('hidden');
+}
+
+// Mostrar tela de registro
+function showRegister() {
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('registerScreen').classList.remove('hidden');
+    document.getElementById('forgotPasswordScreen').classList.add('hidden');
+    document.getElementById('dashboardScreen').classList.add('hidden');
+}
+
+// Mostrar tela de recuperação de senha
+function showForgotPassword() {
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('registerScreen').classList.add('hidden');
+    document.getElementById('forgotPasswordScreen').classList.remove('hidden');
+    document.getElementById('dashboardScreen').classList.add('hidden');
+}
+
+// Mostrar dashboard após login bem-sucedido
+function showDashboardScreen() {
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('registerScreen').classList.add('hidden');
+    document.getElementById('forgotPasswordScreen').classList.add('hidden');
+    document.getElementById('dashboardScreen').classList.remove('hidden');
+    
+    // Mostrar a tela inicial do dashboard
+    showDashboard();
+    
+    // Configurar menus baseado no tipo de usuário
+    setupUserInterface();
+}
+
+// ----------- AUTENTICAÇÃO -----------
+
+// Função de login
+function login(email, password) {
+    const user = users.find(u => u.email === email && u.password === password);
+    if (user) {
+        if (user.isBlocked) {
+            showAlert('Conta bloqueada. Entre em contato com o suporte.', 'error');
+            return false;
+        }
+        currentUser = user;
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        return true;
+    }
+    return false;
+}
+
+// Função de logout
+function logout() {
+    currentUser = null;
+    localStorage.removeItem('currentUser');
+    showLogin();
+}
+
+// Configurar interface baseada no tipo de usuário
+function setupUserInterface() {
+    if (!currentUser) return;
+    
+    // Atualizar informações do usuário
+    document.getElementById('userName').textContent = currentUser.name;
+    document.getElementById('userAccount').textContent = `Conta: ${currentUser.accountNumber}`;
+    document.getElementById('welcomeName').textContent = currentUser.name.split(' ')[0];
+    document.getElementById('currentBalance').textContent = `R$ ${currentUser.balance.toFixed(2)}`;
+    
+    // Configurar menus baseado no tipo de usuário
+    if (currentUser.isAdmin) {
+        document.getElementById('adminMenu').classList.remove('hidden');
+        document.getElementById('userRole').textContent = 'Administrador';
+    } else {
+        document.getElementById('adminMenu').classList.add('hidden');
+    }
+    
+    if (currentUser.isEmployee) {
+        document.getElementById('employeeMenu').classList.remove('hidden');
+        document.getElementById('userRole').textContent = currentUser.isAdmin ? 'Administrador' : 'Funcionário';
+    } else {
+        document.getElementById('employeeMenu').classList.add('hidden');
+        document.getElementById('userRole').textContent = 'Cliente';
+    }
+    
+    // Configurar informações específicas do tipo de conta
+    setupAccountSpecificInfo();
+}
+
+// Configurar informações específicas do tipo de conta
+function setupAccountSpecificInfo() {
+    const infoContainer = document.getElementById('accountSpecificInfo');
+    infoContainer.innerHTML = '';
+    
+    if (currentUser.accountType === 'corrente') {
+        infoContainer.innerHTML = `
+            <div class="account-info-item">
+                <span>Limite de Cheque Especial:</span>
+                <span>R$ 1.000,00</span>
+            </div>
+            <div class="account-info-item">
+                <span>Taxa de Manutenção:</span>
+                <span>R$ 15,00/mês</span>
+            </div>
+        `;
+        document.getElementById('creditLimitsCard').classList.remove('hidden');
+        document.getElementById('investmentLimitsCard').classList.add('hidden');
+    } 
+    else if (currentUser.accountType === 'poupanca') {
+        infoContainer.innerHTML = `
+            <div class="account-info-item">
+                <span>Rendimento Mensal:</span>
+                <span>0,5%</span>
+            </div>
+            <div class="account-info-item">
+                <span>Próximo Rendimento:</span>
+                <span>01/07/2025</span>
+            </div>
+        `;
+        document.getElementById('creditLimitsCard').classList.add('hidden');
+        document.getElementById('investmentLimitsCard').classList.add('hidden');
+    }
+    else if (currentUser.accountType === 'investimento') {
+        infoContainer.innerHTML = `
+            <div class="account-info-item">
+                <span>Perfil de Investidor:</span>
+                <span>Moderado</span>
+            </div>
+            <div class="account-info-item">
+                <span>Rentabilidade Média:</span>
+                <span>1,2% a.m.</span>
+            </div>
+        `;
+        document.getElementById('creditLimitsCard').classList.add('hidden');
+        document.getElementById('investmentLimitsCard').classList.remove('hidden');
+    }
+    
+    // Configurar estatísticas do dashboard
+    setupDashboardStats();
+}
+
+// Configurar estatísticas do dashboard
+function setupDashboardStats() {
+    const statsContainer = document.getElementById('dashboardStats');
+    statsContainer.innerHTML = '';
+    
+    // Estatísticas comuns para todos os tipos de conta
+    statsContainer.innerHTML += `
+        <div class="stat-card">
+            <div class="stat-number">3</div>
+            <div class="stat-label">Transações Hoje</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">15</div>
+            <div class="stat-label">Transações no Mês</div>
+        </div>
+    `;
+    
+    // Estatísticas específicas por tipo de conta
+    if (currentUser.accountType === 'corrente') {
+        statsContainer.innerHTML += `
+            <div class="stat-card">
+                <div class="stat-number">R$ 1.000,00</div>
+                <div class="stat-label">Limite Disponível</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">R$ 0,00</div>
+                <div class="stat-label">Limite Utilizado</div>
+            </div>
+        `;
+    } 
+    else if (currentUser.accountType === 'poupanca') {
+        statsContainer.innerHTML += `
+            <div class="stat-card">
+                <div class="stat-number">R$ 12,50</div>
+                <div class="stat-label">Rendimento do Mês</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">R$ 150,00</div>
+                <div class="stat-label">Rendimento Total</div>
+            </div>
+        `;
+    }
+    else if (currentUser.accountType === 'investimento') {
+        statsContainer.innerHTML += `
+            <div class="stat-card">
+                <div class="stat-number">R$ 30,00</div>
+                <div class="stat-label">Rendimento do Mês</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">3</div>
+                <div class="stat-label">Investimentos Ativos</div>
+            </div>
+        `;
+    }
+}
+
+// ----------- NAVEGAÇÃO NO DASHBOARD -----------
+
+// Esconder todas as telas de conteúdo
+function hideAllContents() {
+    const contents = [
+        'dashboardContent',
+        'extractContent',
+        'transferContent',
+        'limitsContent',
+        'investmentsContent',
+        'profileContent',
+        'accountOpeningContent',
+        'accountClosureContent',
+        'employeeManagementContent',
+        'reportsContent'
+    ];
+    
+    contents.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+    });
+    
+    // Remover classe active de todos os itens de menu
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+    });
+}
+
+// Mostrar dashboard
+function showDashboard() {
+    hideAllContents();
+    document.getElementById('dashboardContent').classList.remove('hidden');
+    document.querySelector('.nav-item[data-section="dashboard"]').classList.add('active');
+}
+
+// Mostrar extrato
+function showExtract() {
+    hideAllContents();
+    document.getElementById('extractContent').classList.remove('hidden');
+    document.querySelector('.nav-item[data-section="extract"]').classList.add('active');
+    loadTransactions();
+}
+
+// Mostrar transferência
+function showTransfer() {
+    hideAllContents();
+    document.getElementById('transferContent').classList.remove('hidden');
+    document.querySelector('.nav-item[data-section="transfer"]').classList.add('active');
+}
+
+// Mostrar limites
+function showLimits() {
+    hideAllContents();
+    document.getElementById('limitsContent').classList.remove('hidden');
+    document.querySelector('.nav-item[data-section="limits"]').classList.add('active');
+    updateLimitsDisplay();
+}
+
+// Mostrar investimentos
+function showInvestments() {
+    hideAllContents();
+    document.getElementById('investmentsContent').classList.remove('hidden');
+    document.querySelector('.nav-item[data-section="investments"]').classList.add('active');
+    loadInvestments();
+}
+
+// Mostrar perfil
+function showProfile() {
+    hideAllContents();
+    document.getElementById('profileContent').classList.remove('hidden');
+    document.querySelector('.nav-item[data-section="profile"]').classList.add('active');
+    loadProfileData();
+}
+
+// ----------- FUNÇÕES PARA FUNCIONÁRIOS -----------
+
+// Mostrar abertura de conta
+function showAccountOpening() {
+    hideAllContents();
+    document.getElementById('accountOpeningContent').classList.remove('hidden');
+    document.querySelector('.nav-item[data-section="account-opening"]').classList.add('active');
+}
+
+// Mostrar encerramento de conta
+function showAccountClosure() {
+    hideAllContents();
+    document.getElementById('accountClosureContent').classList.remove('hidden');
+    document.querySelector('.nav-item[data-section="account-closure"]').classList.add('active');
+}
+
+// Mostrar busca de cliente
+function showCustomerSearch() {
+    hideAllContents();
+    // Implementar tela de busca de cliente
+    showAlert('Funcionalidade de busca de cliente em desenvolvimento', 'info');
+}
+
+// Mostrar gestão de funcionários
+function showEmployeeManagement() {
+    hideAllContents();
+    document.getElementById('employeeManagementContent').classList.remove('hidden');
+    document.querySelector('.nav-item[data-section="employee-management"]').classList.add('active');
+    renderEmployeesTable();
+}
+
+// Mostrar relatórios
+function showReports() {
+    hideAllContents();
+    document.getElementById('reportsContent').classList.remove('hidden');
+    document.querySelector('.nav-item[data-section="reports"]').classList.add('active');
+}
+
+// ----------- FUNÇÕES PARA ADMIN -----------
+
+// Mostrar painel admin
+function showAdmin() {
+    hideAllContents();
+    // Implementar tela de admin
+    showAlert('Painel de administração em desenvolvimento', 'info');
+}
+
+// ----------- FUNÇÕES PARA MOBILE -----------
+
+// Alternar sidebar em dispositivos móveis
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('open');
+}
+
+// ----------- FUNÇÕES PARA REGISTRO -----------
+
+// Selecionar tipo de conta
+function selectAccountType(type) {
+    // Remover seleção anterior
+    document.querySelectorAll('.account-type-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    
+    // Selecionar o card clicado
+    document.querySelector(`.account-type-card[data-type="${type}"]`).classList.add('selected');
+    
+    // Atualizar campo hidden
+    document.getElementById('selectedAccountType').value = type;
+    
+    // Esconder todos os campos específicos
+    document.getElementById('poupancaFields').classList.add('hidden');
+    document.getElementById('correnteFields').classList.add('hidden');
+    document.getElementById('investimentoFields').classList.add('hidden');
+    
+    // Mostrar campos específicos do tipo selecionado
+    document.getElementById(`${type}Fields`).classList.remove('hidden');
+}
+
+// ----------- FUNÇÕES PARA MODAIS -----------
+
+// Fechar modal
+function closeModal() {
+    document.getElementById('confirmModal').classList.add('hidden');
+}
+
+// Confirmar exclusão de conta
+function confirmDeleteAccount() {
+    document.getElementById('confirmModal').classList.remove('hidden');
+    document.getElementById('modalConfirmBtn').onclick = function() {
+        // Aqui você pode adicionar a lógica real de exclusão do usuário atual
+        showAlert('Conta excluída com sucesso!', 'success');
+        closeModal();
+        logout();
+    };
+}
+
+// ----------- FUNÇÕES PARA OPERAÇÕES BANCÁRIAS -----------
+
+// Carregar transações para o extrato
+function loadTransactions() {
+    // Simulação de transações
+    const transactions = [
+        { date: '2025-06-07', type: 'income', description: 'Depósito', amount: 1000.00, balance: 2500.00 },
+        { date: '2025-06-06', type: 'expense', description: 'Pagamento de conta', amount: -150.00, balance: 1500.00 },
+        { date: '2025-06-05', type: 'transfer', description: 'Transferência para João', amount: -350.00, balance: 1650.00 },
+        { date: '2025-06-01', type: 'income', description: 'Salário', amount: 2000.00, balance: 2000.00 }
+    ];
+    
+    const tbody = document.getElementById('transactionsList');
+    tbody.innerHTML = '';
+    
+    transactions.forEach(t => {
+        const row = document.createElement('tr');
+        
+        // Formatar data
+        const date = new Date(t.date);
+        const formattedDate = date.toLocaleDateString('pt-BR');
+        
+        // Determinar ícone e classe baseado no tipo
+        let typeIcon, typeText, amountClass;
+        
+        if (t.type === 'income') {
+            typeIcon = '<span class="transaction-icon transaction-income">+</span>';
+            typeText = 'Entrada';
+            amountClass = 'investment-return positive';
+        } else if (t.type === 'expense') {
+            typeIcon = '<span class="transaction-icon transaction-expense">-</span>';
+            typeText = 'Saída';
+            amountClass = 'investment-return negative';
+        } else {
+            typeIcon = '<span class="transaction-icon transaction-transfer">→</span>';
+            typeText = 'Transferência';
+            amountClass = 'investment-return negative';
+        }
+        
+        row.innerHTML = `
+            <td>${formattedDate}</td>
+            <td>${typeIcon} ${typeText}</td>
+            <td>${t.description}</td>
+            <td class="${amountClass}">R$ ${Math.abs(t.amount).toFixed(2)}</td>
+            <td>R$ ${t.balance.toFixed(2)}</td>
+        `;
+        
+        tbody.appendChild(row);
+    });
+}
+
+// Aplicar filtros no extrato
+function applyExtractFilters() {
+    // Implementação simulada
+    showAlert('Filtros aplicados com sucesso!', 'success');
+    loadTransactions(); // Recarregar transações (simulação)
+}
+
+// Exportar extrato em PDF
+function exportExtract() {
+    showAlert('Exportação de extrato em PDF iniciada. O download começará em instantes.', 'info');
+}
+
+// Exportar extrato em Excel
+function exportExtractExcel() {
+    showAlert('Exportação de extrato em Excel iniciada. O download começará em instantes.', 'info');
+}
+
+// Atualizar exibição de limites
+function updateLimitsDisplay() {
+    // Simulação de limites
+    const dailyLimit = 10000;
+    const dailyUsed = 2500;
+    const dailyAvailable = dailyLimit - dailyUsed;
+    const dailyPercentage = (dailyUsed / dailyLimit) * 100;
+    
+    document.getElementById('dailyLimitUsed').textContent = `R$ ${dailyUsed.toFixed(2)}`;
+    document.getElementById('dailyLimitAvailable').textContent = `R$ ${dailyAvailable.toFixed(2)}`;
+    document.getElementById('dailyLimitProgress').style.width = `${dailyPercentage}%`;
+    
+    // Limites de crédito (apenas para conta corrente)
+    if (currentUser && currentUser.accountType === 'corrente') {
+        const creditLimit = 1000;
+        const creditUsed = 0;
+        const creditAvailable = creditLimit - creditUsed;
+        const creditPercentage = (creditUsed / creditLimit) * 100;
+        
+        document.getElementById('creditLimitTotal').textContent = `R$ ${creditLimit.toFixed(2)}`;
+        document.getElementById('creditLimitUsed').textContent = `R$ ${creditUsed.toFixed(2)}`;
+        document.getElementById('creditLimitAvailable').textContent = `R$ ${creditAvailable.toFixed(2)}`;
+        document.getElementById('creditLimitProgress').style.width = `${creditPercentage}%`;
+    }
+}
+
+// Carregar investimentos
+function loadInvestments() {
+    if (!currentUser || currentUser.accountType !== 'investimento') {
+        document.getElementById('investmentGrid').innerHTML = `
+            <div class="investment-card">
+                <div>Sem investimentos ativos</div>
+                <div class="investment-return">-</div>
+                <div>Abra uma conta de investimento para começar</div>
+            </div>
+        `;
+        return;
+    }
+    
+    // Simulação de investimentos
+    document.getElementById('investmentGrid').innerHTML = `
+        <div class="investment-card">
+            <div>Poupança</div>
+            <div class="investment-return positive">+0,5%</div>
+            <div>R$ 1.000,00</div>
+        </div>
+        <div class="investment-card">
+            <div>CDB</div>
+            <div class="investment-return positive">+1,2%</div>
+            <div>R$ 5.000,00</div>
+        </div>
+        <div class="investment-card">
+            <div>Ações</div>
+            <div class="investment-return negative">-0,8%</div>
+            <div>R$ 2.000,00</div>
+        </div>
+    `;
+}
+
+// Calcular projeção de rendimentos
+function calculateYieldProjection() {
+    const amount = parseFloat(document.getElementById('projectionAmount').value);
+    const period = parseInt(document.getElementById('projectionPeriod').value);
+    
+    if (isNaN(amount) || amount <= 0) {
+        showAlert('Por favor, informe um valor válido para investimento.', 'error');
+        return;
+    }
+    
+    // Taxa mensal simulada (1.2%)
+    const monthlyRate = 0.012;
+    const finalAmount = amount * Math.pow(1 + monthlyRate, period);
+    const yield = finalAmount - amount;
+    const yieldPercentage = (yield / amount) * 100;
+    
+    document.getElementById('projectedTotal').textContent = `R$ ${finalAmount.toFixed(2)}`;
+    document.getElementById('projectedYield').textContent = `R$ ${yield.toFixed(2)}`;
+    document.getElementById('projectedRate').textContent = `${yieldPercentage.toFixed(2)}%`;
+    
+    document.getElementById('projectionResults').classList.remove('hidden');
+}
+
+// Carregar dados do perfil
+function loadProfileData() {
+    if (!currentUser) return;
+    
+    document.getElementById('profileName').value = currentUser.name;
+    document.getElementById('profileCPF').value = currentUser.cpf;
+    document.getElementById('profileEmail').value = currentUser.email;
+    document.getElementById('profilePhone').value = '(11) 98765-4321'; // Simulado
+    document.getElementById('profileAccountNumber').value = currentUser.accountNumber;
+    document.getElementById('profileAccountType').value = currentUser.accountType === 'corrente' ? 'Conta Corrente' : 
+                                                        currentUser.accountType === 'poupanca' ? 'Conta Poupança' : 'Conta Investimento';
+    document.getElementById('profileCreatedAt').value = new Date(currentUser.createdAt).toLocaleDateString('pt-BR');
+}
+
+// Exportar relatório
+function exportReport() {
+    showAlert('Exportação de relatório iniciada. O download começará em instantes.', 'info');
+}
+
+// ----------- EVENT LISTENERS -----------
+
+// Event listener para o formulário de login
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    
+    // Mostrar loading
+    document.querySelector('.login-text').classList.add('hidden');
+    document.querySelector('.loading').classList.remove('hidden');
+    
+    // Simular delay de rede
+    setTimeout(() => {
+        if (login(email, password)) {
+            showAlert('Login realizado com sucesso!', 'success');
+            showDashboardScreen();
+        } else {
+            showAlert('Email ou senha incorretos.', 'error');
+            // Esconder loading
+            document.querySelector('.login-text').classList.remove('hidden');
+            document.querySelector('.loading').classList.add('hidden');
+        }
+    }, 1000);
+});
+
+// Event listener para o formulário de registro
+document.getElementById('registerForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const name = document.getElementById('registerName').value;
+    const email = document.getElementById('registerEmail').value;
+    const password = document.getElementById('registerPassword').value;
+    const confirmPassword = document.getElementById('registerConfirmPassword').value;
+    const cpf = document.getElementById('registerCPF').value;
+    const accountType = document.getElementById('selectedAccountType').value;
+    
+    // Validações básicas
+    if (!name || !email || !password || !cpf || !accountType) {
+        showAlert('Por favor, preencha todos os campos obrigatórios.', 'error');
+        return;
+    }
+    
+    if (password !== confirmPassword) {
+        showAlert('As senhas não coincidem.', 'error');
+        return;
+    }
+    
+    if (password.length < 8) {
+        showAlert('A senha deve ter pelo menos 8 caracteres.', 'error');
+        return;
+    }
+    
+    // Verificar se o email já está em uso
+    if (users.some(u => u.email === email)) {
+        showAlert('Este email já está em uso.', 'error');
+        return;
+    }
+    
+    // Criar novo usuário
+    const newUser = {
+        id: users.length + 1,
+        name,
+        email,
+        password,
+        cpf,
+        balance: 0,
+        isAdmin: false,
+        isEmployee: false,
+        isBlocked: false,
+        accountType,
+        accountNumber: `${1000 + users.length}-${Math.floor(Math.random() * 9) + 1}`,
+        createdAt: new Date().toISOString().split('T')[0]
+    };
+    
+    // Adicionar usuário à lista
+    users.push(newUser);
+    
+    showAlert('Conta criada com sucesso! Faça login para continuar.', 'success');
+    showLogin();
+});
+
+// Event listener para o formulário de recuperação de senha
+document.getElementById('forgotPasswordForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('forgotEmail').value;
+    
+    // Verificar se o email existe
+    if (!users.some(u => u.email === email)) {
+        showAlert('Email não encontrado.', 'error');
+        return;
+    }
+    
+    showAlert('Um link de recuperação foi enviado para o seu email.', 'success');
+    showLogin();
+});
+
+// Event listener para o formulário de transferência
+document.getElementById('transferForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const amount = parseFloat(document.getElementById('transferAmount').value);
+    
+    if (isNaN(amount) || amount <= 0) {
+        showAlert('Por favor, informe um valor válido para transferência.', 'error');
+        return;
+    }
+    
+    if (amount > currentUser.balance) {
+        showAlert('Saldo insuficiente para realizar esta transferência.', 'error');
+        return;
+    }
+    
+    // Simular transferência
+    currentUser.balance -= amount;
+    document.getElementById('currentBalance').textContent = `R$ ${currentUser.balance.toFixed(2)}`;
+    
+    showAlert('Transferência realizada com sucesso!', 'success');
+    this.reset();
+});
+
+// Event listener para o formulário de perfil
+document.getElementById('profileForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const name = document.getElementById('profileName').value;
+    const email = document.getElementById('profileEmail').value;
+    const phone = document.getElementById('profilePhone').value;
+    const newPassword = document.getElementById('profileNewPassword').value;
+    
+    // Atualizar dados do usuário
+    currentUser.name = name;
+    currentUser.email = email;
+    
+    if (newPassword) {
+        currentUser.password = newPassword;
+    }
+    
+    // Atualizar interface
+    document.getElementById('userName').textContent = name;
+    document.getElementById('welcomeName').textContent = name.split(' ')[0];
+    
+    showAlert('Perfil atualizado com sucesso!', 'success');
+});
+
+// Inicialização
+window.onload = function() {
+    // Verificar se há usuário logado no localStorage
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+        showDashboardScreen();
+    } else {
+        showLogin();
+    }
+    
+    // Preencher dados simulados
+    if (currentUser) {
+        setupUserInterface();
+    }
+};
+    </script>
+</body>
+</html>
+
